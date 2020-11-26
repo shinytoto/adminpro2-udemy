@@ -15,7 +15,6 @@ export class BreadcrumbsComponent implements OnDestroy {
   constructor(private router: Router) {
     // Desestructuración de objetos: Extraer la propiedad "titulo" del argumento que se esta recibiendo
     this.tituloSubs$ = this.getDataRuta().subscribe(({ titulo }) => {
-      console.log(titulo);
       this.titulo = titulo;
       document.title = `AdminPro - ${titulo}`;
     });

@@ -11,6 +11,10 @@ declare const gapi: any;
 import { RegisterForm } from '../interfaces/register-form.interface';
 import { LoginForm } from '../interfaces/login-form.interace';
 
+// Models
+import { Usuario } from '../models/usuario.model';
+import Swal from 'sweetalert2';
+
 const base_url = environment.base_url;
 
 @Injectable({
@@ -18,6 +22,7 @@ const base_url = environment.base_url;
 })
 export class UsuarioService {
   public auth2: any;
+  public usuario: Usuario;
 
   constructor(
     private http: HttpClient,
@@ -27,12 +32,42 @@ export class UsuarioService {
     this.googleInit();
   }
 
+  get token(): string {
+    return localStorage.getItem('token') || '';
+  }
+
+  get usuarioId(): string {
+    return this.usuario._id || '';
+  }
+
   crearUsuario(formData: RegisterForm) {
     return this.http.post(`${base_url}/usuario`, formData).pipe(
       tap((response: any) => {
         localStorage.setItem('token', response.token);
       })
     );
+  }
+
+  actualizarUsuario(usuario: { nombre: string; email: string; role: string }) {
+    usuario = {
+      ...usuario,
+      role: this.usuario.role,
+    };
+
+    return this.http
+      .put(`${base_url}/usuario/${this.usuarioId}`, usuario, {
+        headers: { 'x-token': this.token },
+      })
+      .pipe(
+        map((response) => {
+          Swal.fire(
+            'Usuario Actualizado',
+            'Los datos se han actualizado correctamente.',
+            'success'
+          );
+          return response;
+        })
+      );
   }
 
   loginUsuario(formData: LoginForm) {
@@ -44,20 +79,26 @@ export class UsuarioService {
   }
 
   validarToken(): Observable<boolean> {
-    const token = localStorage.getItem('token') || '';
+    // const token = localStorage.getItem('token') || '';
 
     return this.http
       .get(`${base_url}/auth/renovar`, {
-        headers: { 'x-token': token },
+        headers: { 'x-token': this.token },
       })
       .pipe(
-        tap((response: any) => {
+        map((response: any) => {
+          // Creación de instancia con los datos que nos llegan
+          const { email, google, nombre, role, img = '', _id } = response.usuarioDB;
+          this.usuario = new Usuario(nombre, email, '', img, google, role, _id);
+
           localStorage.setItem('token', response.token);
+          return true;
         }),
-        map((response) => true),
         catchError((error) => of(false)) // Devolver Observable con el valor de FALSE
       );
   }
+
+  // ? Google
 
   loginGoogle(token) {
     return this.http.post(`${base_url}/auth/google`, { token }).pipe(

@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // Modules
 import { SharedModule } from '../shared/shared.module';
 import { ComponentsModule } from '../components/components.module';
+import { PipesModule } from '../pipes/pipes.module';
 
 // Components
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -19,6 +20,7 @@ import { PerfilComponent } from './perfil/perfil.component';
 import { UsuariosComponent } from './mantenimientos/usuarios/usuarios.component';
 import { MedicosComponent } from './mantenimientos/medicos/medicos.component';
 import { HospitalesComponent } from './mantenimientos/hospitales/hospitales.component';
+import { MedicoComponent } from './mantenimientos/medicos/medico.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +35,7 @@ import { HospitalesComponent } from './mantenimientos/hospitales/hospitales.comp
     UsuariosComponent,
     MedicosComponent,
     HospitalesComponent,
+    MedicoComponent,
   ],
   exports: [
     PagesComponent,
@@ -48,6 +51,7 @@ import { HospitalesComponent } from './mantenimientos/hospitales/hospitales.comp
     RouterModule,
     SharedModule,
     ComponentsModule,
+    PipesModule,
   ],
 })
 export class PagesModule {}

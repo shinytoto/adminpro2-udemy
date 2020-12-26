@@ -48,12 +48,23 @@ export class UsuarioService {
     };
   }
 
+  get role(): 'ADMIN_ROLE' | 'USER_ROLE' {
+    return this.usuario.role;
+  }
+
   crearUsuario(formData: RegisterForm) {
-    return this.http.post(`${base_url}/usuario`, formData).pipe(
-      tap((response: any) => {
-        localStorage.setItem('token', response.token);
-      })
-    );
+    return this.http
+      .post<{ token: string }>(`${base_url}/usuario`, formData)
+      .pipe(
+        tap(({ token }) => {
+          localStorage.setItem('token', token);
+        })
+      );
+  }
+
+  guardarLocalStorage(token: string, menu: any) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('menu', JSON.stringify(menu));
   }
 
   actualizarUsuario(usuario: { nombre: string; email: string; role: string }) {
@@ -103,30 +114,21 @@ export class UsuarioService {
   }
 
   loginUsuario(formData: LoginForm) {
-    return this.http.post(`${base_url}/auth`, formData).pipe(
-      tap((response: any) => {
-        localStorage.setItem('token', response.token);
-      })
-    );
+    return this.http
+      .post<any>(`${base_url}/auth`, formData)
+      .pipe(tap(({ token, menu }) => this.guardarLocalStorage(token, menu)));
   }
 
   validarToken(): Observable<boolean> {
     // const token = localStorage.getItem('token') || '';
 
-    return this.http.get(`${base_url}/auth/renovar`, this.headers).pipe(
-      map((response: any) => {
+    return this.http.get<any>(`${base_url}/auth/renovar`, this.headers).pipe(
+      map(({ token, menu, usuarioDB }) => {
         // Creación de instancia con los datos que nos llegan
-        const {
-          email,
-          google,
-          nombre,
-          role,
-          img = '',
-          _id,
-        } = response.usuarioDB;
+        const { email, google, nombre, role, img = '', _id } = usuarioDB;
         this.usuario = new Usuario(nombre, email, '', img, google, role, _id);
 
-        localStorage.setItem('token', response.token);
+        this.guardarLocalStorage(token, menu);
         return true;
       }),
       catchError((error) => of(false)) // Devolver Observable con el valor de FALSE
@@ -136,11 +138,9 @@ export class UsuarioService {
   // ? Google
 
   loginGoogle(token) {
-    return this.http.post(`${base_url}/auth/google`, { token }).pipe(
-      tap((response: any) => {
-        localStorage.setItem('token', response.token);
-      })
-    );
+    return this.http
+      .post<any>(`${base_url}/auth/google`, { token })
+      .pipe(tap(({ token, menu }) => this.guardarLocalStorage(token, menu)));
   }
 
   googleInit() {
@@ -159,11 +159,12 @@ export class UsuarioService {
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('menu');
+
+    // TODO: Borrar menú
 
     this.auth2.signOut().then(() => {
-      this.ngZone.run(() => {
-        this.router.navigateByUrl('/login');
-      });
+      this.ngZone.run(() => this.router.navigateByUrl('/login'));
     });
   }
 
@@ -172,10 +173,8 @@ export class UsuarioService {
   }
 
   guardarUsuario(usuario: Usuario) {
-    return this.http.put(
-      `${base_url}/usuario/${usuario._id}`,
-      usuario,
-      this.headers
-    );
+    return this.http
+      .put<any>(`${base_url}/usuario/${usuario._id}`, usuario, this.headers)
+      .pipe(tap(({ menu }) => localStorage.setItem('menu', menu)));
   }
 }

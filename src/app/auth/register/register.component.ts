@@ -17,13 +17,10 @@ export class RegisterComponent {
 
   public registerForm = this.formBuilder.group(
     {
-      nombre: [
-        'Nicolás Córdoba',
-        [Validators.required, Validators.minLength(3)],
-      ],
-      email: ['test100@gmail.com', [Validators.required, Validators.email]],
-      password: ['12345', Validators.required],
-      password2: ['12345', Validators.required],
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+      password2: ['', Validators.required],
       terminos: [false, [Validators.required, Validators.requiredTrue]],
     },
     {
@@ -45,15 +42,8 @@ export class RegisterComponent {
     } else {
       // Realizar el posteo
       this._usuarioService.crearUsuario(this.registerForm.value).subscribe(
-        (response) => {
-          this.router.navigateByUrl('/');
-        },
-        (error) => {
-          {
-            // Si sucede un error
-            Swal.fire('Error', error.error.mensaje, 'error');
-          }
-        }
+        () => this.router.navigateByUrl('/'),
+        (error) => Swal.fire('Error', error.error.mensaje, 'error')
       );
     }
   }

@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 // Guards
 import { AuthGuard } from '../guards/auth.guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 // Components
 import { PagesComponent } from './pages.component';
@@ -17,6 +18,7 @@ import { UsuariosComponent } from './mantenimientos/usuarios/usuarios.component'
 import { HospitalesComponent } from './mantenimientos/hospitales/hospitales.component';
 import { MedicosComponent } from './mantenimientos/medicos/medicos.component';
 import { MedicoComponent } from './mantenimientos/medicos/medico.component';
+import { BusquedaComponent } from './busqueda/busqueda.component';
 
 const routes: Routes = [
   {
@@ -31,12 +33,15 @@ const routes: Routes = [
       { path: 'promesas', component: PromesasComponent, data: { titulo: 'Promesas' } },
       { path: 'rxjs', component: RxjsComponent, data: { titulo: 'RXJS' } },
       { path: 'perfil', component: PerfilComponent, data: { titulo: 'Perfil de usuario' } },
+      { path: 'busqueda/:termino', component: BusquedaComponent, data: { titulo: 'Búsquedas' } },
 
       // Mantenimientos
-      { path: 'usuarios', component: UsuariosComponent, data: { titulo: 'Usuarios de la aplicación' } },
       { path: 'hospitales', component: HospitalesComponent, data: { titulo: 'Hospitales de la aplicación' } },
       { path: 'medicos', component: MedicosComponent, data: { titulo: 'Médicos de la aplicación' } },
       { path: 'medico/:id', component: MedicoComponent, data: { titulo: 'Mantenimiento de médico' } },
+
+      // Rutas de Admin
+      { path: 'usuarios', canActivate: [AdminGuard], component: UsuariosComponent, data: { titulo: 'Usuarios de la aplicación' } },
     ],
   },
 ];
